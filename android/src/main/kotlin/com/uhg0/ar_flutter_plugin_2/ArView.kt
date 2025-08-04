@@ -57,6 +57,7 @@ import io.github.sceneview.math.Scale
 import io.github.sceneview.math.colorOf
 import io.github.sceneview.loaders.MaterialLoader
 import com.google.ar.core.exceptions.SessionPausedException
+import io.github.sceneview.ar.arcore.rotation
 
 class ArView(
     context: Context,
@@ -795,23 +796,9 @@ class ArView(
             val frame = sceneView.session?.update()
             val cameraPose = frame?.camera?.pose
             if (cameraPose != null) {
-                val poseData =
-                    mapOf(
-                        "position" to
-                            mapOf(
-                                "x" to cameraPose.tx(),
-                                "y" to cameraPose.ty(),
-                                "z" to cameraPose.tz(),
-                            ),
-                        "rotation" to
-                            mapOf(
-                                "x" to cameraPose.rotationQuaternion[0],
-                                "y" to cameraPose.rotationQuaternion[1],
-                                "z" to cameraPose.rotationQuaternion[2],
-                                "w" to cameraPose.rotationQuaternion[3],
-                            ),
-                    )
-                result.success(poseData)
+                val matrix = FloatArray(16)
+                cameraPose.toMatrix(matrix, 0)
+                result.success(matrix)
             } else {
                 result.error("NO_CAMERA_POSE", "Camera pose is not available", null)
             }
